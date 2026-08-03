@@ -156,26 +156,31 @@ export interface Database {
         Row: Department;
         Insert: DepartmentInsert;
         Update: DepartmentUpdate;
+        Relationships: any[];
       };
       orders: {
         Row: Order;
         Insert: OrderInsert;
         Update: OrderUpdate;
+        Relationships: any[];
       };
       order_line_items: {
         Row: OrderLineItem;
         Insert: OrderLineItemInsert;
         Update: OrderLineItemUpdate;
+        Relationships: any[];
       };
       bundles: {
         Row: Bundle;
         Insert: BundleInsert;
         Update: BundleUpdate;
+        Relationships: any[];
       };
       stage_events: {
         Row: StageEvent;
         Insert: StageEventInsert;
         Update: StageEventUpdate;
+        Relationships: any[];
       };
     };
     Views: Record<string, never>;
