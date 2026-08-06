@@ -3,6 +3,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { orderSchema } from "./validation";
 import { revalidatePath } from "next/cache";
+import { DEFAULT_BUNDLE_SIZE } from "@/constants/bundles";
+import { generateBundles } from "@/lib/utils/generateBundles";
 
 export async function createOrderAction(formData: FormData) {
   const buyer = formData.get("buyer") as string;
@@ -69,12 +71,13 @@ export async function createOrderAction(formData: FormData) {
     quantity_ordered: item.quantity,
   }));
 
-  const { error: lineItemsError } = await supabase
+  const { data: insertedLineItems, error: lineItemsError } = await supabase
     .from("order_line_items")
     // @ts-expect-error Supabase strict typing issue with hand-authored types
-    .insert(lineItemsToInsert);
+    .insert(lineItemsToInsert)
+    .select("id, quantity_ordered");
 
-  if (lineItemsError) {
+  if (lineItemsError || !insertedLineItems) {
     // Attempt rollback
     await supabase.from("orders").delete().eq("id", orderId);
     
@@ -82,6 +85,39 @@ export async function createOrderAction(formData: FormData) {
       success: false,
       message: "Failed to save order line items. The order creation was rolled back.",
     };
+  }
+
+  const bundlesToInsert = [];
+  const items = insertedLineItems as { id: string; quantity_ordered: number }[];
+  
+  for (const lineItem of items) {
+    const generated = generateBundles(lineItem.quantity_ordered, DEFAULT_BUNDLE_SIZE);
+    for (const bundle of generated) {
+      bundlesToInsert.push({
+        order_line_item_id: lineItem.id,
+        bundle_number: bundle.bundleNumber,
+        quantity: bundle.quantity,
+        current_stage: "received",
+        status: "in_progress",
+      });
+    }
+  }
+
+  if (bundlesToInsert.length > 0) {
+    const { error: bundlesError } = await supabase
+      .from("bundles")
+      // @ts-expect-error Supabase strict typing issue with hand-authored types
+      .insert(bundlesToInsert);
+
+    if (bundlesError) {
+      // Attempt rollback
+      await supabase.from("orders").delete().eq("id", orderId);
+      
+      return {
+        success: false,
+        message: "Failed to generate production bundles. The order creation was rolled back.",
+      };
+    }
   }
 
   revalidatePath("/dashboard/orders");

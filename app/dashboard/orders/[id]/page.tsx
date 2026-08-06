@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
-import type { Order, OrderLineItem } from "@/types/database";
+import type { Order, OrderLineItem, Bundle } from "@/types/database";
 
 export const metadata = {
   title: "Order Details | ThreadOps",
@@ -32,6 +32,19 @@ export default async function OrderDetailsPage({
     .order("size", { ascending: true });
     
   const lineItems = (rawLineItems || []) as unknown as OrderLineItem[];
+
+  const lineItemIds = lineItems.map(item => item.id);
+  let bundles: Bundle[] = [];
+  
+  if (lineItemIds.length > 0) {
+    const { data: rawBundles } = await supabase
+      .from("bundles")
+      .select("*")
+      .in("order_line_item_id", lineItemIds)
+      .order("bundle_number", { ascending: true });
+      
+    bundles = (rawBundles || []) as unknown as Bundle[];
+  }
 
 
   return (
@@ -75,32 +88,56 @@ export default async function OrderDetailsPage({
         <div className="p-6 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/50">
           <h2 className="text-xl font-bold text-neutral-900 dark:text-white">Line Items</h2>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-neutral-200 dark:border-neutral-800 text-sm font-medium text-neutral-500 dark:text-neutral-400 bg-white dark:bg-neutral-900">
-                <th className="py-4 px-6 font-medium">Size</th>
-                <th className="py-4 px-6 font-medium">Color</th>
-                <th className="py-4 px-6 font-medium">Quantity</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
-              {lineItems?.map((item) => (
-                <tr key={item.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
-                  <td className="py-4 px-6 text-neutral-900 dark:text-white font-medium">{item.size}</td>
-                  <td className="py-4 px-6 text-neutral-600 dark:text-neutral-300">{item.color}</td>
-                  <td className="py-4 px-6 text-neutral-900 dark:text-white font-medium">{item.quantity_ordered}</td>
-                </tr>
-              ))}
-              {!lineItems || lineItems.length === 0 ? (
-                <tr>
-                  <td colSpan={3} className="py-8 text-center text-neutral-500 dark:text-neutral-400">
-                    No line items found.
-                  </td>
-                </tr>
-              ) : null}
-            </tbody>
-          </table>
+        <div className="p-6 flex flex-col gap-8">
+          {lineItems?.map((item) => {
+            const itemBundles = bundles.filter(b => b.order_line_item_id === item.id);
+            return (
+              <div key={item.id} className="border border-neutral-200 dark:border-neutral-800 rounded-lg overflow-hidden">
+                <div className="bg-neutral-50 dark:bg-neutral-800/50 p-4 border-b border-neutral-200 dark:border-neutral-800 flex justify-between items-center">
+                  <div>
+                    <span className="font-semibold text-neutral-900 dark:text-white">Size: {item.size}</span>
+                    <span className="mx-2 text-neutral-400">•</span>
+                    <span className="text-neutral-600 dark:text-neutral-300">Color: {item.color}</span>
+                  </div>
+                  <div className="font-medium text-neutral-900 dark:text-white">
+                    Ordered Qty: {item.quantity_ordered}
+                  </div>
+                </div>
+                <div className="p-0">
+                  <table className="w-full text-left border-collapse text-sm">
+                    <thead>
+                      <tr className="border-b border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-neutral-500 dark:text-neutral-400">
+                        <th className="py-3 px-4 font-medium">Bundle #</th>
+                        <th className="py-3 px-4 font-medium">Quantity</th>
+                        <th className="py-3 px-4 font-medium">Current Stage</th>
+                        <th className="py-3 px-4 font-medium">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
+                      {itemBundles.map((bundle) => (
+                        <tr key={bundle.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors bg-white dark:bg-neutral-900">
+                          <td className="py-3 px-4 text-neutral-900 dark:text-white font-medium">{bundle.bundle_number}</td>
+                          <td className="py-3 px-4 text-neutral-900 dark:text-white">{bundle.quantity}</td>
+                          <td className="py-3 px-4 text-neutral-600 dark:text-neutral-300 capitalize">{bundle.current_stage}</td>
+                          <td className="py-3 px-4 text-neutral-600 dark:text-neutral-300 capitalize">{bundle.status.replace('_', ' ')}</td>
+                        </tr>
+                      ))}
+                      {itemBundles.length === 0 && (
+                        <tr>
+                          <td colSpan={4} className="py-4 text-center text-neutral-500">No bundles generated.</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            );
+          })}
+          {!lineItems || lineItems.length === 0 ? (
+            <div className="text-center py-8 text-neutral-500 dark:text-neutral-400">
+              No line items found.
+            </div>
+          ) : null}
         </div>
       </div>
     </main>
