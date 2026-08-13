@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { BundleStage } from "@/types/database";
+import FloorClient from "./FloorClient";
 
 const CURRENT_DEPARTMENT = process.env.NEXT_PUBLIC_DEV_DEPARTMENT ?? "QC";
 
@@ -72,84 +73,7 @@ export default async function FloorPage() {
 
   return (
     <main className="min-h-screen bg-neutral-950 p-4 md:p-8 flex flex-col font-sans">
-      <header className="mb-8">
-        <h1 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight">
-          {CURRENT_DEPARTMENT} Queue
-        </h1>
-        <p className="text-neutral-400 mt-2 text-lg md:text-xl">
-          {bundles.length} bundle{bundles.length !== 1 && "s"} pending
-        </p>
-      </header>
-
-      {bundles.length === 0 ? (
-        <div className="flex-1 flex items-center justify-center">
-          <h2 className="text-3xl md:text-5xl font-bold text-neutral-600 tracking-tight">
-            All caught up
-          </h2>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {bundles.map((bundle) => (
-            <div
-              key={bundle.id}
-              className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 md:p-8 flex flex-col justify-between shadow-lg relative overflow-hidden"
-            >
-              {bundle.status === "rework" && (
-                <div className="absolute top-0 right-0 bg-red-600 text-white font-black text-xl md:text-2xl px-6 py-2 rounded-bl-2xl">
-                  REWORK
-                </div>
-              )}
-              
-              <div className="mb-8">
-                <div className="text-neutral-400 text-lg md:text-xl font-medium mb-1 uppercase tracking-wider">
-                  {bundle.buyer}
-                </div>
-                <div className="text-white text-3xl md:text-4xl font-bold mb-4">
-                  {bundle.style_code}
-                </div>
-                
-                <div className="flex flex-wrap gap-4 mt-6">
-                  <div className="bg-neutral-800 rounded-2xl px-5 py-3">
-                    <div className="text-neutral-500 text-sm md:text-base font-semibold uppercase tracking-wider mb-1">
-                      Size
-                    </div>
-                    <div className="text-white text-2xl md:text-3xl font-bold">
-                      {bundle.size}
-                    </div>
-                  </div>
-                  <div className="bg-neutral-800 rounded-2xl px-5 py-3">
-                    <div className="text-neutral-500 text-sm md:text-base font-semibold uppercase tracking-wider mb-1">
-                      Color
-                    </div>
-                    <div className="text-white text-2xl md:text-3xl font-bold">
-                      {bundle.color}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-end justify-between mt-auto pt-6 border-t border-neutral-800">
-                <div>
-                  <div className="text-neutral-500 text-sm md:text-base font-semibold uppercase tracking-wider mb-1">
-                    Bundle
-                  </div>
-                  <div className="text-white text-4xl md:text-5xl font-black">
-                    #{bundle.bundle_number}
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-neutral-500 text-sm md:text-base font-semibold uppercase tracking-wider mb-1">
-                    Qty
-                  </div>
-                  <div className="text-white text-4xl md:text-5xl font-black">
-                    {bundle.quantity}
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      <FloorClient bundles={bundles} currentDepartment={CURRENT_DEPARTMENT} />
     </main>
   );
 }
