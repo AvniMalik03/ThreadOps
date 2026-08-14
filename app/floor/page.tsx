@@ -38,7 +38,8 @@ export default async function FloorPage() {
         stage
       )
     `)
-    .eq("current_stage", currentStage);
+    .eq("current_stage", currentStage)
+    .in("status", ["in_progress", "rework"]);
 
   if (error) {
     console.error("Error fetching bundles:", error);
