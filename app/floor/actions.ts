@@ -158,7 +158,6 @@ export async function processBundleAction(
     throw new Error(`Failed to record stage event: ${eventError.message}`);
   }
 
-  // Update bundle if passed > 0
   if (quantityPassed > 0) {
     const updatePayload: any = {
       quantity: quantityPassed,
@@ -181,7 +180,7 @@ export async function processBundleAction(
   } else if (quantityRejected === bundle.quantity) {
     const { error: updateError } = await (supabase as any)
       .from("bundles")
-      .update({ status: "completed" })
+      .update({ status: "rework" })
       .eq("id", bundleId);
 
     if (updateError) {
@@ -189,7 +188,7 @@ export async function processBundleAction(
     }
   }
 
-  if (quantityRejected > 0) {
+  if (quantityRejected > 0 && quantityPassed > 0) {
     await createReworkBundle({
       supabase,
       orderLineItemId: bundle.order_line_item_id,
