@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { Bundle, Order, OrderLineItem, StageEvent } from "@/types/database";
 import { isOrderStuck } from "@/lib/utils/isOrderStuck";
@@ -178,9 +178,17 @@ export default async function DashboardPage() {
             Active production orders by current unit location.
           </p>
         </div>
-        <div className="text-sm font-medium text-neutral-500 dark:text-neutral-400">
-          {dashboardOrders.length} active order
-          {dashboardOrders.length !== 1 ? "s" : ""}
+        <div className="flex flex-col md:items-end gap-2">
+          <div className="text-sm font-medium text-neutral-500 dark:text-neutral-400">
+            {dashboardOrders.length} active order
+            {dashboardOrders.length !== 1 ? "s" : ""}
+          </div>
+          <Link
+            href="/dashboard/activity"
+            className="text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+          >
+            View Activity Log &rarr;
+          </Link>
         </div>
       </div>
 
