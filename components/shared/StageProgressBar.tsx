@@ -23,13 +23,13 @@ export const PIPELINE: BundleStage[] = [
 ];
 
 export const STAGE_STYLES: Record<BundleStage, { label: string; color: string }> = {
-  received:  { label: "Received",  color: "bg-sky-500"     },
-  cutting:   { label: "Cutting",   color: "bg-amber-500"   },
-  stitching: { label: "Stitching", color: "bg-violet-500"  },
+  received:  { label: "Received",  color: "bg-stone-400"   },
+  cutting:   { label: "Cutting",   color: "bg-amber-400"   },
+  stitching: { label: "Stitching", color: "bg-violet-400"  },
   finishing: { label: "Finishing", color: "bg-emerald-500" },
-  ironing:   { label: "Ironing",   color: "bg-rose-500"    },
-  packing:   { label: "Packing",   color: "bg-indigo-500"  },
-  dispatch:  { label: "Dispatch",  color: "bg-teal-500"    },
+  ironing:   { label: "Ironing",   color: "bg-rose-400"    },
+  packing:   { label: "Packing",   color: "bg-indigo-400"  },
+  dispatch:  { label: "Dispatch",  color: "bg-teal-400"    },
 };
 
 // ---------------------------------------------------------------------------
@@ -97,13 +97,13 @@ export function StageProgressBar({
 }: StageProgressBarProps) {
   return (
     <div>
-      {/* Segmented bar */}
-      <div className="h-6 w-full overflow-hidden rounded-md bg-neutral-100 dark:bg-neutral-800 flex">
+      {/* Segmented bar — thin, elegant strip */}
+      <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-100 flex">
         {stageProgress.map(({ stage, quantity, percentage }) =>
           quantity > 0 ? (
             <div
               key={stage}
-              className={`${STAGE_STYLES[stage].color} h-full min-w-1`}
+              className={`${STAGE_STYLES[stage].color} h-full min-w-px opacity-80`}
               style={{ width: `${percentage}%` }}
               title={`${STAGE_STYLES[stage].label}: ${quantity} units (${formatPercent(percentage)})`}
             />
@@ -113,16 +113,16 @@ export function StageProgressBar({
 
       {/* Legend */}
       {showLegend && (
-        <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+        <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-2">
           {stageProgress.map(({ stage, quantity, percentage }) => (
-            <div key={stage} className="flex items-center gap-2 min-w-0">
-              <span className={`${STAGE_STYLES[stage].color} h-3 w-3 rounded-sm shrink-0`} />
+            <div key={stage} className="flex items-center gap-1.5 min-w-0">
+              <span className={`${STAGE_STYLES[stage].color} h-2 w-2 rounded-sm shrink-0 opacity-80`} />
               <div className="min-w-0">
-                <p className="text-xs font-semibold text-neutral-700 dark:text-neutral-200 truncate">
+                <p className="text-[11px] font-semibold text-neutral-600 truncate leading-tight">
                   {STAGE_STYLES[stage].label}
                 </p>
-                <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                  {quantity} / {formatPercent(percentage)}
+                <p className="text-[11px] text-neutral-400 leading-tight">
+                  {quantity} · {formatPercent(percentage)}
                 </p>
               </div>
             </div>

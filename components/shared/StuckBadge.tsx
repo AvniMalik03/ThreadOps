@@ -1,4 +1,4 @@
-﻿/**
+/**
  * StuckBadge — shared presentational component.
  *
  * Renders the amber warning pill shown on the dashboard and order detail page
@@ -19,12 +19,12 @@ export function StuckBadge({ isStuck, daysSinceLastMovement }: StuckBadgeProps) 
   const stuckDays = Math.floor(daysSinceLastMovement);
 
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 dark:bg-amber-900/50 px-2.5 py-0.5 text-xs font-semibold text-amber-800 dark:text-amber-300 ring-1 ring-inset ring-amber-300 dark:ring-amber-700">
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-200">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 20 20"
         fill="currentColor"
-        className="h-3.5 w-3.5 shrink-0"
+        className="h-3 w-3 shrink-0"
         aria-hidden="true"
       >
         <path
